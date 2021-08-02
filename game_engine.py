@@ -11,18 +11,23 @@ class Col:
         self.black=(0,0,0)
         self.white=(255,255,255)
         self.red=(255,0,0)
-        
+        self.gold=(218,165,32)        
         self.yellow=(255,255,0)
         self.green=(0,150,0)
         self.blue=(0,0,255)
         self.purple=(155,0,255)
         self.cyan=(0,255,255)
         self.grey=(150,150,120)
-        self.pink=(255,120,120)
+        self.pink=(255,140,200)
         self.darkgreen=(0,100,0)
         self.brown=(140,42,42)
         self.darkred=(50,0,0)
         self.darkgrey=(60,60,60)
+        self.lightpink=(255,182,193)
+        self.sandy=(250,192,174)
+        self.lightgrey=(180,180,180)
+        self.darkgrey=(120,120,120)
+        self.lightgreen=(0,220,0)
         
         
         
@@ -37,9 +42,15 @@ class Tile:
         self.forest=["Forest",c.darkgreen,8]
         self.house=["House",c.yellow,3]
         self.woodcutter=["Woodcutter",c.brown,4]
-        self.sealover=["Poseidon",c.cyan,5]
+        self.poseidon=["Poseidon",c.cyan,5]
         self.mordor=["Mordor",c.darkred,9]
         self.darklord=["Dark Lord",c.black,11]
+        self.farm=["Farm",c.pink,12]
+        self.field=["Field",c.gold,13]
+        self.beach=["Beach",c.sandy,14]
+        self.townhall=["Townhall",c.purple,15]
+        self.fire=["Fire",c.red,6]
+        self.druidtemple=["Druid Temple",c.lightgreen,16]
         
 t=Tile(c)
 
@@ -70,7 +81,7 @@ class Window(Rectangle):
         
     def initialize_game(self):    
         pygame.init()
-        pygame.display.set_caption("Dominikova hra")
+        pygame.display.set_caption("Village against the tide of sea and evil")
         clock=pygame.time.Clock()
         self.screen.fill(self.bg_color)
         gameIcon = pygame.image.load('icon.png')
@@ -146,6 +157,8 @@ class Grid(Rectangle):
             for j in range(self.columns):                 
                 self.grid[i][j]=1
                 
+    #def add_additional_variables_to_grid(self,*args)
+    
     def generate_random_map(self,terrains,*args):
             
         if len(args)>0:
@@ -159,12 +172,73 @@ class Grid(Rectangle):
             for i in range(self.rows):
                 for j in range(self.columns):                 
                     self.grid[i][j]=random.choice(terrains)
+            if self.grid[0][0]!=1:
+                for i in range(self.rows):
+                        self.grid[i][0]=0
+                        self.grid[i][self.columns-1]=0
+                for j in range(self.columns):
+                        self.grid[0][j]=0 
+                        self.grid[self.rows-1][j]=0
+                    
+    def place_randomly(self,whattoplace,*args):
+        terrainsinquestion = []
+        if len(args)>0:
+            conditionterrain=args[0]
+            #print (conditionterrain)
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    if (self.grid[i][j]==conditionterrain and i!=0 and i!=self.rows-1 and j!=0 and j!=self.columns-1):                        
+                        terrainsinquestion.append([i,j])
+        elif len(args)==0:
+            for i in range(self.rows):
+                for j in range(self.columns):
+                    if (i!=0 and i!=self.rows and j!=0 and j!=self.columns):
+                        terrainsinquestion.append([i,j])
             for i in range(self.rows):
                     self.grid[i][0]=0
                     self.grid[i][self.columns-1]=0
             for j in range(self.columns):
                     self.grid[0][j]=0 
                     self.grid[self.rows-1][j]=0
+        print(terrainsinquestion)
+        print(len(terrainsinquestion))
+        chosentileno=random.randint(0,len(terrainsinquestion))
+        print("ChosenTileNo is: ",chosentileno)
+        chosentile=terrainsinquestion[chosentileno]
+        print("chosentile is: ",chosentile)
+        print("chosentile x is: ",chosentile[0])
+        print("chosentile y is: ",chosentile[1])
+        self.grid[chosentile[0]][chosentile[1]]=whattoplace
+        
+# def unit_move(self,whattoplace,fromwhere,*args):
+#         terrainsinquestion = []
+#         if len(args)>0:
+#             conditionterrain=args[0]
+#             #print (conditionterrain)
+#             for i in range(self.rows):
+#                 for j in range(self.columns):
+#                     if (self.grid[i][j]==conditionterrain and i!=0 and i!=self.rows-1 and j!=0 and j!=self.columns-1):                        
+#                         terrainsinquestion.append([i,j])
+#         elif len(args)==0:
+#             for i in range(self.rows):
+#                 for j in range(self.columns):
+#                     if (i!=0 and i!=self.rows and j!=0 and j!=self.columns):
+#                         terrainsinquestion.append([i,j])
+#             for i in range(self.rows):
+#                     self.grid[i][0]=0
+#                     self.grid[i][self.columns-1]=0
+#             for j in range(self.columns):
+#                     self.grid[0][j]=0 
+#                     self.grid[self.rows-1][j]=0
+#         print(terrainsinquestion)
+#         print(len(terrainsinquestion))
+#         chosentileno=random.randint(0,len(terrainsinquestion))
+#         print("ChosenTileNo is: ",chosentileno)
+#         chosentile=terrainsinquestion[chosentileno]
+#         print("chosentile is: ",chosentile)
+#         print("chosentile x is: ",chosentile[0])
+#         print("chosentile y is: ",chosentile[1])
+#         self.grid[chosentile[0]][chosentile[1]]=whattoplace
         
     def smooth_map_connector(self,value):
         mask=np.array(np.zeros((self.rows,self.columns),dtype=int))
@@ -296,13 +370,14 @@ def main_program_loop(window,clock):
         time_fr+=1
         if time_fr%5==0:
             game_mechanics.update_labels(labels)
+            game_mechanics.update_alerts(labels,grids)
             game_mechanics.update_ctverce(ctverce)
             game_mechanics.time_event(grids,time_fr)
             #if time_fr>10:
             #    print (grids[0].grid[0][0])
         if time_fr%60==0:
             time+=1
-            print("time:",time)
+            print("=============== 60x time: ",time," ====================")
             
             
         pygame.display.flip()   
