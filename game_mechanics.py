@@ -34,7 +34,7 @@ class memory():
         self.listoffire_pos=[]
         self.tile_attractiveness_for_conversion=[]
         self.tile_protection_for_conversion=[]
-mem=memory(3,10000,10000,50,10,0,0,0,"You are good",0,0,"OFF",0,0)
+mem=memory(2,10000,10000,50,10,0,0,0,"You are good",0,0,"OFF",0,0)
 
 
 def initialize_grids(grids):
@@ -52,10 +52,22 @@ def initialize_grids(grids):
     return(grids)
 
 def initialize_ctverce(ctverce,grids):
+    ctverce.append([grids[0].margin + grids[0].position[0],
+                    grids[0].margin + grids[0].position[1],
+                    grids[0].cell_size[0],
+                    grids[0].cell_size[1],
+                    (255,0,0),
+                        2]) 
     ctverce.append([grids[1].margin + grids[1].position[0],
                     grids[1].margin + grids[1].position[1],
                     grids[1].cell_size[0],
                     grids[1].cell_size[1],
+                    (255,0,0),
+                        2])
+    ctverce.append([grids[2].margin + grids[2].position[0],
+                    grids[2].margin + grids[2].position[1],
+                    grids[2].cell_size[0],
+                    grids[2].cell_size[1],
                     (255,0,0),
                         2])
                         
@@ -129,7 +141,12 @@ def evaluate_click(grids,click,t,ctverce):
             mem.row=". "
             mem.column=" ."
             mem.tiletypename="None"
-           
+        
+        if row<=grid.rows and row>=0 and column<=grid.columns and column>=0:    
+            ctverce[0][0]=(grid.margin + grid.cell_size[0]) * column + grid.margin + grid.position[0]
+            ctverce[0][1]=(grid.margin + grid.cell_size[1]) * row + grid.margin + grid.position[1]
+            ctverce[0][2]=grid.cell_size[0]
+            ctverce[0][3]=grid.cell_size[1]
         
     for grid in menu_grids:
 
@@ -140,16 +157,17 @@ def evaluate_click(grids,click,t,ctverce):
             if grid==grids[2]:
                 function_array=[set_value,set_value,set_value,set_value,set_value,set_value,set_value]
                 parameter_array=[0,0,3,4,12,15,16]
+                i=2
             elif grid==grids[1]:
                 function_array=[reset,generate_terrain,smooth_terrain,plant_trees,place_poseidon,place_darklord,nothing,nothing,nothing]
                 parameter_array=[grids[0],grids[0],grids[0],grids[0],grids[0],grids[0],20]
-                   
+                i=1
                 
             if row<=grid.rows and row>=0 and column<=grid.columns and column>=0:
-                ctverce[0][0]=(grid.margin + grid.cell_size[0]) * column + grid.margin + grid.position[0]
-                ctverce[0][1]=(grid.margin + grid.cell_size[1]) * row + grid.margin + grid.position[1]
-                ctverce[0][2]=grid.cell_size[0]
-                ctverce[0][3]=grid.cell_size[1]
+                ctverce[i][0]=(grid.margin + grid.cell_size[0]) * column + grid.margin + grid.position[0]
+                ctverce[i][1]=(grid.margin + grid.cell_size[1]) * row + grid.margin + grid.position[1]
+                ctverce[i][2]=grid.cell_size[0]
+                ctverce[i][3]=grid.cell_size[1]
             
             function_array[index](parameter_array[index])
         
@@ -302,45 +320,30 @@ def set_element_value(grid,row,column,value,clicked):
                 mem.alert="Not enough resources"
                 mem.alertcounter=5
                     
-        if grid.grid[row][column] in [9] and clicked=="Druid Temple": #kdo kliká
-            grid.grid[row][column] = 2
-        if grid.grid[row][column] in [2] and clicked=="Poseidon": #kdo kliká
-            #resource=grid.grid[row][column]
-            grid.grid[row][column] = 14
-        if clicked=="Dark Lord": #kdo kliká
-            #resource=grid.grid[row][column]
+        if clicked=="Druid Temple": #kdo kliká
             grid.grid[row][column] = value
-       # if grid.grid[row][column] in [14] and clicked=="Dark Lord": #kdo kliká
-            #resource=grid.grid[row][column]
-        #    grid.grid[row][column] = 9
-       # if grid.grid[row][column] in [8] and clicked=="Dark Lord": #kdo kliká
-            #resource=grid.grid[row][column]
-       #     grid.grid[row][column] = 6
+        if clicked=="Poseidon": #kdo kliká
+            grid.grid[row][column] = value
+        if clicked=="Dark Lord": #kdo kliká
+            grid.grid[row][column] = value
+            print("I will burn all the land!!!!!")
             if value==6:
                 mem.busy_natureevent1.append(0) #ohen odpočet
                 mem.listoffire_pos.append([row,column])
                 print("listoffire",mem.listoffire_pos)
-        if grid.grid[row][column] in [6] and clicked=="Fire": #kdo kliká
-            #resource=grid.grid[row][column]
-            print("Ted se meni Fire na Mordor. Pop?", mem.busy_natureevent1)
+        if clicked=="Fire": #kdo kliká
+            print("Ted se meni Fire na Mordor.", mem.busy_natureevent1)
             mem.burnedforests+=1
-            #mem.busy_natureevent1.pop(0)
             grid.grid[row][column] = 9
-           # mem.busy_natureevent1.append(0) #ohen odpočet
-        if grid.grid[row][column] in [2] and clicked=="Farmer": #kdo kliká
-            #resource=grid.grid[row][column]
+        if clicked=="Farmer": #kdo kliká
             grid.grid[row][column] = 13
-            #if resource==6:
-            #    mem.food+=10
-            #if resource==8:
-            #    mem.wood+=10
-        if grid.grid[row][column] in [13,8] and clicked=="Woodcutter": #klikání obecné. musi byt na konci aby se nespoustelo drive nez ostatni
+        if clicked=="Woodcutter":
             resource=grid.grid[row][column]
-            grid.grid[row][column] = 2
+            grid.grid[row][column] = value
             if resource==8:
                 mem.wood+=10
-
-        if grid.grid[row][column] in [13,8] and clicked=="Player": #klikání obecné. musi byt na konci aby se nespoustelo drive nez ostatni
+                
+        if grid.grid[row][column] in [13,8] and clicked=="Player": #klikání obecné. 
             resource=grid.grid[row][column]
             grid.grid[row][column] = 2
             if resource==13:
@@ -446,23 +449,11 @@ def time_event(grids,time_fr):
                 if mem.busy_buildings3[i]==0:
                     mem.busy_buildings3[i]=2+math.floor(near_distances[i])#cas co potrebuje mezi konvertovanim kazdeho pole
                 elif mem.busy_buildings3[i]==1:
-                    print("neartilevalue:",near_tile_values)
-                  #  if any(grid.grid[row][column]==z for z in tile_value)
-                    if True in[near_tile_values == zz for zz in [[2],[14]]]: #meni travu na mordor
+                    print("neartilevalue:",near_tile_values[i])
+                    if True in[near_tile_values[i] == zz for zz in [2,14]]: #meni travu na mordor
                           set_element_value(grid,near_positions[i].x,near_positions[i].y,9, "Dark Lord") #posledni znaci na co se to zmeni
-                    if any(near_tile_values == zz for zz in [[3],[4],[8],[12],[15],[16]]): #meni cokoliv na ohen
+                    if any(near_tile_values[i] == zz for zz in [3,4,8,12,15,16]): #meni cokoliv na ohen
                           set_element_value(grid,near_positions[i].x,near_positions[i].y,6, "Dark Lord") #posledni znaci na co se to zmeni
-                    # if sum([int(near_tile_values == zz) for zz in [3,4,8,12,15,16]])>0:
-                    #     print("neartilevalue2:",near_tile_values)
-                    #     set_element_value(grid,near_positions[i].x,near_positions[i].y,6, "Dark Lord")
-                    # if sum([int(near_tile_values == zz) for zz in [[2],[14]]])>0:
-                    #     print("neartilevalue2:",near_tile_values)
-                    #     set_element_value(grid,near_positions[i].x,near_positions[i].y,9, "Dark Lord")
-                #    if near_tile_values == [8]: #meni cokoliv na ohen
-                 #       set_element_value(grid,near_positions[i].x,near_positions[i].y,6, "Dark Lord") #posledni znaci na co se to zmeni
-                  #  if near_tile_values == [14]: #meni plaz na mordor
-                  #      set_element_value(grid,near_positions[i].x,near_positions[i].y,9, "Dark Lord") #posledni znaci na co se to zmeni
-                       # men.listoffire_pos.append()
                     mem.busy_buildings3[i]-=1
                 else:
                     mem.busy_buildings3[i]-=1
